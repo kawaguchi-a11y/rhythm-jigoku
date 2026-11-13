@@ -151,7 +151,9 @@ h1.mini{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,
 .gicon{grid-row:1 / span 2;width:76px;height:76px;border-radius:12px;border:2px solid var(--sumi);display:block}
 .game b,.game span{grid-column:2}
 .pbar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(18,14,20,.6);border:2px solid var(--sumi);border-radius:12px;padding:8px 10px;font-size:14px;font-weight:700}
-.pbar span{min-width:0;overflow:hidden;overflow-wrap:anywhere}
+.pbar span{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.chars button:not([aria-pressed=true]){background:#dcc596}
+.note.skd{min-height:calc(3em + 12px);box-sizing:border-box}
 .pbar b{font-family:var(--disp);font-weight:400;font-size:19px;color:var(--kin)}
 #pChange{font-family:var(--disp);font-size:13px;padding:8px 10px;background:var(--shu);color:var(--washi);border:2px solid var(--sumi);border-radius:999px;box-shadow:2px 2px 0 var(--sumi);cursor:pointer;white-space:nowrap;flex:0 0 auto}
 .plist{gap:6px}
@@ -243,7 +245,7 @@ h1.mini{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,
 <section class="screen" id="hub">
   <div class="inner">
     <div class="logo"><small>リズムで あそぼう！</small><h1><span>リズム地獄</span><svg class="kanabo" viewBox="0 0 64 120" aria-hidden="true"><g transform="rotate(22 32 60)"><rect x="27" y="88" width="10" height="28" rx="4" fill="#e3432b" stroke="#120e14" stroke-width="3"/><path d="M27 96 l10 -4 M27 104 l10 -4 M27 112 l10 -4" stroke="#120e14" stroke-width="1.5"/><path d="M24 90 L17 16 Q32 2 47 16 L40 90 Z" fill="#3a3340" stroke="#120e14" stroke-width="3"/><path d="M22 20 Q26 10 32 9" stroke="rgba(255,255,255,.35)" stroke-width="3" fill="none" stroke-linecap="round"/><g fill="#f4b731" stroke="#120e14" stroke-width="1.5"><circle cx="25" cy="24" r="3.2"/><circle cx="39" cy="24" r="3.2"/><circle cx="32" cy="34" r="3.2"/><circle cx="24" cy="44" r="3.2"/><circle cx="40" cy="44" r="3.2"/><circle cx="32" cy="54" r="3.2"/><circle cx="25" cy="64" r="3"/><circle cx="39" cy="64" r="3"/><circle cx="32" cy="74" r="3"/></g><rect x="21" y="86" width="22" height="6" rx="2" fill="#f4b731" stroke="#120e14" stroke-width="2"/></g></svg></h1></div>
-    <div class="pbar"><span>プレイヤー：<b id="pName"></b></span><button type="button" id="pChange">プレイヤー チェンジ</button></div>
+    <div class="pbar"><span><b id="pName"></b></span><button type="button" id="pChange">チェンジ</button></div>
     <div class="pick"><h2>だれと あそぶ？</h2><div class="modes" id="modes"></div><small class="note" id="modeNote" hidden></small></div>
     <div class="pick"><h2>ゲームを えらぶ</h2><div class="games">
       <button class="game" id="gOen" type="button"><canvas class="gicon" id="icOen" width="160" height="160"></canvas><b>夕焼け応援団</b><span>ドン と パン の 2つの ボタンで おうえん！</span></button>
@@ -1271,12 +1273,19 @@ function buildK(s){
   ev.sort((a,b)=>a.t-b.t);
   return {ev,notes,beat,bar,fly,end:end+bar*0.8};
 }
+function balanceFlips(A,B,sg){
+  const own=p=>A.map((n,i)=>i).filter(i=>!(p?B:A)[i].other&&!A[i].cat),fl=i=>A[i].dir0!==undefined;
+  const o0=own(0),o1=own(1);let f0=o0.filter(fl).length,f1=o1.filter(fl).length;
+  const add=(o)=>{const c=o.filter(i=>!fl(i)&&A[i].t>sg.bar*2);if(!c.length)return false;const i=c[Math.floor(Math.random()*c.length)];
+    const d0=A[i].dir,d=(d0+1+Math.floor(Math.random()*3))%4,fa=A[i].t-sg.fly*0.32;for(const X of[A,B]){X[i].dir0=d0;X[i].dir=d;X[i].flipAt=fa;}
+    sg.notes[i].dir0=d0;sg.notes[i].dir=d;sg.notes[i].flipAt=fa;sg.ev.push({t:fa,k:'meow'});return true;};
+  while(f0<f1&&add(o0))f0++;while(f1<f0&&add(o1))f1++;sg.ev.sort((a,b)=>a.t-b.t);}
 function kNew(notes,ch){return{ch,sp:0,skillT:0,skUI:'',score:0,combo:0,maxCombo:0,counts:{p:0,g:0,m:0},errSum:0,errN:0,ni:0,notes:notes.map(n=>({...n})),punch:0,judge:null,broken:[]};}
 function karaStart(i){
   if(!initAudio())return;if(GAME==='oen')GAME='kara';
   const s=(GAME==='ninja'?NSONGS:KSONGS)[i],LV=LEVELS[lvIdx];[PERF,GOOD,MISS]=LV.w;
   const sg=buildK(s);K={mode:GAME,idx:i,s,sg,P:VS?[kNew(sg.notes,kc(0)),kNew(sg.notes,kc(1))]:[kNew(sg.notes,kc(0))],evIdx:0};
-  if(VS){const mix=Math.random()<0.5;if(mix)splitNotes(K.P[0].notes,K.P[1].notes,sg.bar);K.P.forEach(Q=>{Q.judge={text:mix?'こうたいで うとう！':'いっしょに うとう！',col:C.kin,t:-1.6};});}
+  if(VS){const mix=Math.random()<0.5;if(mix){splitNotes(K.P[0].notes,K.P[1].notes,sg.bar);if(GAME==='ninja')balanceFlips(K.P[0].notes,K.P[1].notes,sg);}K.P.forEach(Q=>{Q.judge={text:mix?'こうたいで うとう！':'いっしょに うとう！',col:C.kin,t:-1.6};});}
   if(musicBus){try{musicBus.disconnect();}catch(e){}}musicBus=AC.createGain();musicBus.gain.value=0.9;musicBus.connect(master);
   songStart=AC.currentTime+0.6;song=null;
   ['hub','title','title2','result'].forEach(id=>$(id).hidden=true);$('panel').hidden=true;$('giveup').hidden=false;$('giveup').classList.toggle('vs',VS);$('giveup').classList.remove('top');$('skillBtn').hidden=false;$('skillBtn2').hidden=!VS;$('skillBtn').className='';$('skillBtn2').className='';
@@ -1470,7 +1479,7 @@ function openNameDlg(andStart){startAfterName=!!andStart;$('nErr').hidden=true;$
   const pl=$('pList');pl.innerHTML='';store.get('oen-players',[]).slice(0,8).forEach(n=>{const b=document.createElement('button');b.type='button';b.textContent=String(n);b.addEventListener('click',()=>{const nm=String(n),other=lastIn==='nameIn'?'nameIn2':'nameIn';if(VS&&$(other).value.trim()===nm){$('nErr').hidden=false;return;}$('nErr').hidden=true;$(lastIn).value=nm;if(VS&&lastIn==='nameIn'){lastIn='nameIn2';}});pl.appendChild(b);});pl.hidden=!pl.children.length;
   $('nameDlg').hidden=false;lastIn='nameIn';setTimeout(()=>{try{$('nameIn').focus();}catch(e){}},60);}
 function startGame(i){pendingStage=i;const n2=String(store.get('oen-name2','')||'');if(!playerName||(VS&&!n2)){openNameDlg(true);return;}if(VS)VSN=[playerName,n2];if(GAME!=='oen')karaStart(i);else startStage(i);}
-function showPlayer(){const n2=String(store.get('oen-name2','')||'');const es=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));$('pName').innerHTML=playerName?(VS?'1P'+es(playerName)+'<small class="amp">&amp;</small>2P'+es(n2||'？'):es(playerName)):'まだ きまって いないよ';}
+function showPlayer(){const n2=String(store.get('oen-name2','')||'');const es=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));$('pName').innerHTML=playerName?(VS?'1P '+es(playerName)+'<small class="amp">&amp;</small>2P '+es(n2||'？'):'1P '+es(playerName)):'まだ きまって いないよ';}
 function askName(i){pendingStage=i;openNameDlg(true);}
 function askNameOld(i){pendingStage=i;$('nameIn').value=playerName;$('nameIn2').hidden=!VS;$('nameIn2').value=String(store.get('oen-name2','')||'');$('nameIn').placeholder=VS?'1人目（左）のなまえ':'なまえ（10文字まで）';$('nameDlg').hidden=false;setTimeout(()=>{try{$('nameIn').focus();}catch(e){}},60);}
 $('nameForm').addEventListener('submit',e=>{e.preventDefault();const v=$('nameIn').value.trim().slice(0,10);if(!v){$('nameIn').focus();return;}
