@@ -285,6 +285,11 @@ h1.mini{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,
 #kPanel.good{background:#fff4c4}#kPanel.good .tag{background:var(--shu)}
 #kPanel.bad{background:#d6d8e2}#kPanel.bad .tag{background:var(--ai)}
 #kPanel.pop{animation:pop .4s}
+
+/* menu header: title left, back button right */
+#title .bar,#title2 .bar,#ranking .bar{flex-direction:row-reverse;justify-content:space-between}
+/* game names centered in the space right of the icon */
+.game b{justify-self:center;text-align:center}
 </style>
 <div id="probe"></div>
 <canvas id="cv"></canvas>
