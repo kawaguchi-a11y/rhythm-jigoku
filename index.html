@@ -680,13 +680,18 @@ function useSkill(){
   const now=AC.currentTime;SND.whistle(now,0.4,sfxBus);SND.stab(now,[523.25,659.25,783.99,1046.5],0.6,sfxBus);
   fx.push({k:'txt',text:'技「'+sk.skn+'」',x:L.colX+L.colW/2,y:L.laneTop+80,t:0,col:C.kin,s:26});
 }
+const RURL='https://script.google.com/macros/s/AKfycbyE91Ws109ePKcm-SuMljTb07-NaaAsMuD3whOu0hNvKbKqkaHgSbohS8gpQxU8MDDUQg/exec';
+const rTo=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms||9000))]);
+async function rGet(q){const r=await rTo(fetch(RURL+'?'+new URLSearchParams(q)));if(!r.ok)throw new Error('http');const j=await r.json();if(!Array.isArray(j))throw new Error('bad');return j;}
+async function rPost(o){await rTo(fetch(RURL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}));}
 async function saveAndShowRank(entry){
   const list=$('rkList'),note=$('rkNote');
   $('rkTitle').textContent='ランキング';
   list.innerHTML='<li><span>よみこみちゅう…</span></li>';note.textContent='';
   const to=p=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),10000))]);
   let rows=null,shared=false;
-  if(DB){
+  try{await rPost(Object.assign({game:GAME,label:entry.label||('応援団 ステージ'+(STAGES.findIndex(s=>s.id===entry.stage)+1))},entry));rows=await rGet({a:'rank',key:entry.key});shared=true;}catch(e){rows=null;}
+  if(!rows&&DB){
     try{const col=DB.collection('ranking');await to(col.add(entry));
       const snap=await to(col.where('key','==',entry.key).orderBy('score','desc').limit(300).get());
       rows=snap.docs.map(d=>d.data());shared=true;}catch(e){rows=null;}
@@ -716,7 +721,8 @@ async function showHistory(name){
   list.innerHTML='<li><span>よみこみちゅう…</span></li>';note.textContent='';
   const to=p=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),10000))]);
   let rows=null;
-  if(DB&&rkCache&&rkCache.shared){try{const snap=await to(DB.collection('ranking').where('name','==',name).orderBy('ts','desc').limit(300).get());rows=snap.docs.map(d=>d.data());}catch(e){rows=null;}}
+  try{rows=await rGet({a:'hist',name});}catch(e){rows=null;}
+  if(!rows&&DB&&rkCache&&rkCache.shared){try{const snap=await to(DB.collection('ranking').where('name','==',name).orderBy('ts','desc').limit(300).get());rows=snap.docs.map(d=>d.data());}catch(e){rows=null;}}
   if(!rows)rows=store.get('oen-rank',[]).filter(r=>r.name===name).sort((a,b)=>b.ts-a.ts);
   $('rkTitle').textContent=name+' さんの きろく（'+rows.length+'回）';
   list.innerHTML='';
@@ -1305,7 +1311,8 @@ function drawHubIcons(){const sv=ctx;try{
 }finally{ctx=sv;}}
 async function showTotal(){['hub','title','title2','result'].forEach(id=>$(id).hidden=true);$('ranking').hidden=false;const list=$('totList');list.innerHTML='<li><span>よみこみちゅう…</span></li>';$('totNote').textContent='';
   let rows=null;
-  if(DB){try{const snap=await Promise.race([DB.collection('ranking').limit(1000).get(),new Promise((_,r)=>setTimeout(()=>r(new Error('t')),10000))]);rows=snap.docs.map(d=>d.data());}catch(e){rows=null;}}
+  try{rows=await rGet({a:'total'});}catch(e){rows=null;}
+  if(!rows&&DB){try{const snap=await Promise.race([DB.collection('ranking').limit(1000).get(),new Promise((_,r)=>setTimeout(()=>r(new Error('t')),10000))]);rows=snap.docs.map(d=>d.data());}catch(e){rows=null;}}
   const shared=!!rows;if(!rows)rows=store.get('oen-rank',[]);
   const agg={};rows.forEach(r=>{const n=String(r.name||'名無し').slice(0,10);const a=agg[n]||(agg[n]={name:n,pts:0,plays:0});a.pts+=Number(r.score)||0;a.plays++;});
   const arr=Object.values(agg).sort((a,b)=>b.pts-a.pts);list.innerHTML='';
