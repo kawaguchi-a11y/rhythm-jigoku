@@ -1527,7 +1527,7 @@ async function showTotal(){['hub','title','title2','result'].forEach(id=>$(id).h
     const ub=document.createElement('button');ub.type='button';ub.className='uchiwake';ub.textContent='内訳';
     const c=document.createElement('small');c.textContent=a.plays+'回 あそんだ';
     const det=document.createElement('div');det.className='det';det.hidden=true;
-    ub.addEventListener('click',e=>{e.stopPropagation();if(det.hidden&&!det.childElementCount)fillDetail(det,a.recs);det.hidden=!det.hidden;ub.textContent=det.hidden?'内訳':'とじる';ub.setAttribute('aria-expanded',String(!det.hidden));});
+    ub.addEventListener('click',e=>{e.stopPropagation();if(det.hidden&&!det.childElementCount){if(shared&&a.recs.length&&a.recs[0].lv===undefined){det.textContent='よみこみちゅう…';rGet({a:'hist',name:a.name}).then(r=>fillDetail(det,r)).catch(()=>fillDetail(det,a.recs));}else fillDetail(det,a.recs);}det.hidden=!det.hidden;ub.textContent=det.hidden?'内訳':'とじる';ub.setAttribute('aria-expanded',String(!det.hidden));});
     li.append(s,b,ub,c,det);list.appendChild(li);});
   if(!arr.length)list.innerHTML='<li><span>まだ きろくが ないよ</span></li>';
   $('totNote').hidden=true;}
