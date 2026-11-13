@@ -55,6 +55,10 @@ html,body{overscroll-behavior:none}
 #giveup.vs #quitBtn{flex:0 0 auto;font-size:11px}
 #skillBtn.ready{background:var(--kin);color:var(--sumi);border-color:var(--washi);animation:glow .7s infinite alternate}
 #skillBtn.on{background:var(--shu);border-color:var(--kin)}
+#skillBtn2.ready{background:var(--kin);color:var(--sumi);border-color:var(--washi);animation:glow .7s infinite alternate}
+#skillBtn2.on{background:var(--shu);border-color:var(--kin)}
+#giveup #skillBtn,#giveup #skillBtn2{flex:1 1 0;min-width:0;max-width:22rem;height:50px;font-size:15px;border-width:3px;overflow:hidden;text-overflow:ellipsis}
+#giveup.vs #skillBtn,#giveup.vs #skillBtn2{font-size:12px;padding:0 6px}
 @keyframes glow{from{box-shadow:0 0 0 rgba(244,183,49,0)}to{box-shadow:0 0 18px rgba(244,183,49,.95)}}
 .dlg{position:fixed;inset:0;z-index:10;background:rgba(18,14,20,.78);display:flex;align-items:center;justify-content:center;padding:16px}
 .dlgIn{background:var(--washi);color:var(--sumi);border:3px solid var(--sumi);box-shadow:6px 6px 0 var(--sumi);padding:18px;display:grid;gap:14px;width:100%;max-width:22rem;box-sizing:border-box}
@@ -216,7 +220,11 @@ h1.mini{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,
 @keyframes meBounce{from{transform:scale(1)}to{transform:scale(1.03)}}
 .rank .note{font-size:13px;text-align:center}
 .newrec{font-size:20px;text-align:center;animation:meBounce .6s ease-in-out infinite alternate}
-@media (prefers-reduced-motion:reduce){#panel.pop{animation:none}.rank li.me,.newrec{animation:none}}
+#giveup button.pop{position:fixed;transform:translate(-50%,-50%);height:auto;min-width:96px;max-width:46vw;padding:6px 14px 8px;font-size:26px;line-height:1.1;display:flex;flex-direction:column;align-items:center;border-radius:20px;flex:none;z-index:7;background:var(--kin);color:var(--sumi);border:4px solid var(--washi);box-shadow:0 0 0 3px var(--sumi),0 6px 0 3px var(--sumi);animation:skPop .35s cubic-bezier(.2,1.6,.4,1),glow .7s .35s infinite alternate}
+#giveup button.pop small{font-size:12px;font-family:var(--body);font-weight:700;white-space:nowrap}
+#giveup button.pop:active{transform:translate(-50%,-46%)}
+@keyframes skPop{from{transform:translate(-50%,-50%) scale(.2)}to{transform:translate(-50%,-50%) scale(1)}}
+@media (prefers-reduced-motion:reduce){#panel.pop{animation:none}#giveup button.pop{animation:none}.rank li.me,.newrec{animation:none}}
 </style>
 
 <div id="probe"></div>
@@ -672,6 +680,7 @@ function finishVS(){
   $('panel').hidden=true;$('giveup').hidden=true;$('result').hidden=false;$('rRetry').focus();
   SND.crowd(AC.currentTime,sfxBus);SND.whistle(AC.currentTime+0.1,0.5,sfxBus);
 }
+function skPlace(b,on,x,y){on=false;b.classList.toggle('pop',!!on);if(on){const nm=b.textContent.replace(/^技！/,'');b.textContent='技！';const sm=document.createElement('small');sm.textContent=nm;b.appendChild(sm);b.style.left=Math.round(clamp(x,62,W-62))+'px';b.style.top=Math.round(clamp(y,L.sT+60,H-L.sB-40))+'px';}else{b.style.left='';b.style.top='';}}
 function useSkill(){
   if(state!=='play'||!sk||skillT>0||sp<100)return;
   sp=0;skillT=sk.dur;skUI='';
@@ -784,7 +793,7 @@ function updateCore(dt,music){
   }
   {const lbl=skillT>0?`${sk.skn}　残り${Math.ceil(skillT)}秒`:sp>=100?`技！${sk.skn}`:`技ゲージ ${Math.floor(sp)}%`;
    if(lbl!==skUI){skUI=lbl;const b=$(cp?'skillBtn2':'skillBtn');b.textContent=lbl;b.className=skillT>0?'on':sp>=100?'ready':'';
-     b.style.background=(skillT>0||sp>=100)?'':`linear-gradient(90deg,rgba(244,183,49,.55) ${sp}%,rgba(244,236,219,.1) ${sp}%)`;}}
+     b.style.background=(skillT>0||sp>=100)?'':`linear-gradient(90deg,rgba(244,183,49,.55) ${sp}%,rgba(244,236,219,.1) ${sp}%)`;skPlace(b,skillT<=0&&sp>=100,L.ldX,L.ldY-70*L.ldS);}}
   while(ni<song.notes.length&&song.notes[ni].judged)ni++;
   for(let i=ni;i<song.notes.length;i++){const n=song.notes[i];if(n.t>j)break;if(!n.judged&&j>n.t+MISS*(skillT>0&&sk.sk==='wide'?2:1)){judge(n,'miss',0);if(state!=='play')return;}}
   const S=song.secs[secIdx];
@@ -1131,9 +1140,9 @@ function nDrawPlayer(P,x0,w,vnow,t,p){
   for(const b of P.broken){const k=b.t/0.6;ctx.globalAlpha=1-k;ctx.fillStyle=ACOL[b.kind]||C.kin;for(let q=0;q<8;q++){const a=q*0.785;ctx.beginPath();ctx.arc(cx+Math.cos(a)*k*S*1.6,hy+Math.sin(a)*k*S*1.6,6*(1-k)+2,0,7);ctx.fill();}ctx.globalAlpha=1;
     if(b.t<0.3)text('シュッ！',cx,hy-S*1.05,18,C.kin,C.sumi,4);}
   if(P.slash){const k=P.slash.t/0.25,d=DV[P.slash.dir];ctx.strokeStyle=`rgba(255,255,255,${1-k})`;ctx.lineWidth=8*(1-k)+2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(cx-d[0]*S,hy-d[1]*S);ctx.lineTo(cx+d[0]*S*(0.2+k),hy+d[1]*S*(0.2+k));ctx.stroke();}
-  drawNinja(cx,H-L.sB-34,Math.min(w/170,1.3),P.slash?P.slash.dir:-1,t,'#2b2440',P.ch);
+  drawNinja(cx,H-L.sB-92,Math.min(w/170,1.3),P.slash?P.slash.dir:-1,t,'#2b2440',P.ch);
   if(P.judge){ctx.globalAlpha=clamp(1-(P.judge.t-0.4)/0.2,0,1);text(P.judge.text,cx,hy+S*0.95,22,P.judge.col,C.sumi,5);ctx.globalAlpha=1;}
-  text('やじるしの むきに スワイプ！',cx,H-L.sB-10,11,'rgba(244,236,219,.65)');
+  text('やじるしの むきに スワイプ！',cx,H-L.sB-68,11,'rgba(244,236,219,.65)');
 }
 const NPT={};
 function nDown(e){NPT[e.pointerId]={x:e.clientX,y:e.clientY,j:songNow()-offset/1000,p:VS&&e.clientX>=W/2?1:0,done:false};}
@@ -1178,7 +1187,7 @@ function karaStart(i){
   if(VS){const mix=Math.random()<0.5;if(mix)splitNotes(K.P[0].notes,K.P[1].notes,sg.bar);K.P.forEach(Q=>{Q.judge={text:mix?'こうたいで うとう！':'いっしょに うとう！',col:C.kin,t:-1.6};});}
   if(musicBus){try{musicBus.disconnect();}catch(e){}}musicBus=AC.createGain();musicBus.gain.value=0.9;musicBus.connect(master);
   songStart=AC.currentTime+0.6;song=null;
-  ['hub','title','title2','result'].forEach(id=>$(id).hidden=true);$('panel').hidden=true;$('giveup').hidden=false;$('giveup').classList.toggle('vs',VS);$('giveup').classList.add('top');$('skillBtn').hidden=false;$('skillBtn2').hidden=!VS;$('skillBtn').className='';$('skillBtn2').className='';
+  ['hub','title','title2','result'].forEach(id=>$(id).hidden=true);$('panel').hidden=true;$('giveup').hidden=false;$('giveup').classList.toggle('vs',VS);$('giveup').classList.remove('top');$('skillBtn').hidden=false;$('skillBtn2').hidden=!VS;$('skillBtn').className='';$('skillBtn2').className='';
   state='play';
 }
 function kJudge(P,n,res,err){if(P.skillT>0&&P.ch&&P.ch.sk==='barrier'&&res!=='perfect'){if(res!=='miss')res='perfect';else{n.judged=true;n.missed=true;P.judge={text:'ガード！',col:'#ffa8d8',t:0};return;}}n.judged=true;
@@ -1204,7 +1213,8 @@ function karaUpdate(dt){
     if(P.skillT>0){if(P.ch&&P.ch.sk==='auto'){for(let i=P.ni;i<P.notes.length;i++){const n=P.notes[i];if(n.t>j)break;if(n.judged||n.cat)continue;kJudge(P,n,'perfect',0);P.punch=1;
       if(K.mode==='ninja'){P.slash={dir:n.dir,t:0};SND.shu(AC.currentTime,sfxBus);}else SND.punch(AC.currentTime,sfxBus);P.broken.push({t:0,kind:K.mode==='ninja'?n.dir:n.kind});}}P.skillT=Math.max(0,P.skillT-dt);}
     if(P.ch){const pi=K.P.indexOf(P),lbl=P.skillT>0?`${P.ch.skn}　のこり${Math.ceil(P.skillT)}`:P.sp>=100?`技！${P.ch.skn}`:`技ゲージ ${Math.floor(P.sp)}%`;
-      if(lbl!==P.skUI){P.skUI=lbl;const b=$(pi?'skillBtn2':'skillBtn');b.textContent=lbl;b.className=P.skillT>0?'on':P.sp>=100?'ready':'';b.style.background=(P.skillT>0||P.sp>=100)?'':`linear-gradient(90deg,rgba(244,183,49,.55) ${P.sp}%,rgba(244,236,219,.1) ${P.sp}%)`;}}
+      if(lbl!==P.skUI){P.skUI=lbl;const b=$(pi?'skillBtn2':'skillBtn');b.textContent=lbl;b.className=P.skillT>0?'on':P.sp>=100?'ready':'';b.style.background=(P.skillT>0||P.sp>=100)?'':`linear-gradient(90deg,rgba(244,183,49,.55) ${P.sp}%,rgba(244,236,219,.1) ${P.sp}%)`;
+        {const nn=K.P.length,x0=nn>1?pi*W/2:0,w=nn>1?W/2:W;let x,y;if(K.mode==='ninja'){x=x0+w/2;y=H-L.sB-34-112*Math.min(w/170,1.3);}else{const s=Math.min(w/150,(H*0.42)/150);x=x0+w*0.62;y=H-L.sB-40-152*s;}skPlace(b,P.skillT<=0&&P.sp>=100,x,y);}}}
     while(P.ni<P.notes.length&&P.notes[P.ni].judged)P.ni++;
     for(let i=P.ni;i<P.notes.length;i++){const n=P.notes[i];if(n.t>j)break;if(!n.judged&&j>n.t+MISS*(P.skillT>0&&P.ch&&P.ch.sk==='wide'?2:1)){if(n.cat){n.judged=true;n.dodged=true;P.score+=200;}else kJudge(P,n,'miss',0);}}}
   if(songNow()>sg.end)karaFinish();
@@ -1246,7 +1256,7 @@ function drawKarateOld(x,y,s,pu,col,t){
   ctx.strokeStyle='#120e14';ctx.lineWidth=1.4*s;ctx.beginPath();ctx.moveTo(...P(-11,-95));ctx.lineTo(...P(-5,-95+(pu>0.5?1:0)));ctx.stroke();
 }
 function kDrawPlayer(P,x0,w,vnow,t,p){
-  const s=Math.min(w/150,(H*0.42)/150),kx=x0+w*0.66,ky=H-L.sB-40,hx=kx-62*s,hy=ky-84*s,sx=x0+8,sy=ky-30*s,arc=Math.min(H*0.28,w*0.9),fly=K.sg.fly,R=Math.max(14,15*s);
+  const s=Math.min(w/150,(H*0.42)/150),kx=x0+w*0.66,ky=H-L.sB-100,hx=kx-62*s,hy=ky-84*s,sx=x0+8,sy=ky-30*s,arc=Math.min(H*0.28,w*0.9),fly=K.sg.fly,R=Math.max(14,15*s);
   text(String((VS?VSN[p]:playerName)||''),x0+w/2,L.sT+62,13,C.washi,C.sumi,3);text(P.score.toLocaleString(),x0+w/2,L.sT+86,22,C.kin,C.sumi,4);
   if(P.combo>=3)text(P.combo+' れんぞく',x0+w/2,L.sT+112,15,C.washi,C.sumi,3);
   ctx.fillStyle='#2a1a12';ctx.fillRect(x0,sy-8,12,44);
