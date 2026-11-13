@@ -1221,7 +1221,7 @@ function buildKChars(){const A=GAME==='ninja'?NCH:KCH;
       const sm=document.createElement('small');sm.textContent=c.nm;b.appendChild(sm);const s2=document.createElement('small');s2.textContent='技：'+c.skn;s2.style.color='#b8322a';b.appendChild(s2);
       b.addEventListener('click',()=>{store.set((p?'kch2-':'kch-')+GAME,i);buildKChars();});box.appendChild(b);
       const sv=ctx;try{ctx=k.getContext('2d');k.width=180;k.height=228;ctx.setTransform(3,0,0,3,0,0);if(GAME==='ninja')drawNinja(30,74,0.78,-1,0,c.col,c);else drawKarate(38,74,0.55,0,c.belt,0,c);}finally{ctx=sv;}});});
-  const c0=kc(0);$('kskDesc').textContent='技効果：'+c0.skd;{const c2=kc(1);$('kskDesc2').textContent='技効果：'+c2.skd;}$('kpick2').hidden=!VS;$('kpick1h').textContent=VS?'1P '+(playerName||'？'):'キャラを えらぶ';$('kpick2h').textContent='2P '+(String(store.get('oen-name2','')||'')||'？');}
+  const c0=kc(0);$('kskDesc').textContent='技：'+c0.skd;{const c2=kc(1);$('kskDesc2').textContent='技：'+c2.skd;}$('kpick2').hidden=!VS;$('kpick1h').textContent=VS?'1P '+(playerName||'？'):'キャラを えらぶ';$('kpick2h').textContent='2P '+(String(store.get('oen-name2','')||'')||'？');}
 function kUseSkill(p){if(!K||state!=='play')return;const P=K.P[p];if(!P||!P.ch||P.skillT>0||P.sp<100)return;P.sp=0;P.skillT=P.ch.dur;P.skUI='';
   SND.whistle(AC.currentTime,0.4,sfxBus);SND.stab(AC.currentTime,[523.25,659.25,783.99,1046.5],0.6,sfxBus);P.judge={text:'技「'+P.ch.skn+'」',col:C.kin,t:-0.8};}
 function kTap(p){const P=K&&K.P[p];const w=P&&P.skillT>0&&P.ch&&P.ch.sk==='wide';const sv=[PERF,GOOD,MISS];if(w){PERF*=2;GOOD*=2;MISS*=2;}try{kTap0(p);}finally{[PERF,GOOD,MISS]=sv;}}
@@ -1557,7 +1557,7 @@ function buildModes(){if($('pName'))showPlayer();const mb=$('modes');mb.innerHTM
     b.addEventListener('click',()=>{VS=v;store.set('oen-vs',v);buildPickers();});mb.appendChild(b);});
   $('modeNote').textContent=VS?'1だいの スマホを ふたりで つかうよ。左がわと 右がわで どうじに あそんで、とくてんを くらべよう！':'ひとりで あそぶよ。';
   $('pick2').hidden=!VS;{const n2=String(store.get('oen-name2','')||'');$('pick1h').textContent=VS?'1P '+(playerName||'？'):'キャラを えらぶ';$('pick2h').textContent='2P '+(n2||'？');}}
-function buildChars2(){{const c2=CHARS[chIdx2];$('skDesc2').textContent='技効果：'+c2.skd;}const cb=$('chars2');cb.innerHTML='';
+function buildChars2(){{const c2=CHARS[chIdx2];$('skDesc2').textContent='技：'+c2.skd;}const cb=$('chars2');cb.innerHTML='';
   CHARS.forEach((c,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-pressed',String(i===chIdx2));
     const k=document.createElement('canvas');k.width=120;k.height=152;k.style.cssText='width:60px;height:76px;display:block;margin:0 auto 2px';b.appendChild(k);
     const sm=document.createElement('small');sm.textContent=c.nm;b.appendChild(sm);const s2=document.createElement('small');s2.textContent='技：'+c.skn;s2.style.color='#b8322a';b.appendChild(s2);
@@ -1567,7 +1567,7 @@ function buildPickers(){buildModes();buildChars2();
   const lb=$('levels');lb.innerHTML='';
   LEVELS.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-pressed',String(i===lvIdx));b.innerHTML=`Lv${v.n}<small>${v.nm}</small>`;
     b.addEventListener('click',()=>{lvIdx=i;store.set('oen-level',i);buildPickers();buildStages();});lb.appendChild(b);});
-  const cb=$('chars');cb.innerHTML='';{const c0=CHARS[chIdx];$('skDesc').textContent='技効果：'+c0.skd;}
+  const cb=$('chars');cb.innerHTML='';{const c0=CHARS[chIdx];$('skDesc').textContent='技：'+c0.skd;}
   CHARS.forEach((c,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-pressed',String(i===chIdx));
     const k=document.createElement('canvas');k.width=120;k.height=152;k.style.cssText='width:60px;height:76px;display:block;margin:0 auto 2px';b.appendChild(k);
     const sm=document.createElement('small');sm.textContent=c.nm;const sk2=document.createElement('small');sk2.textContent='技：'+c.skn;sk2.style.color='#b8322a';b.appendChild(sm);b.appendChild(sk2);
