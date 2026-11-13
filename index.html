@@ -290,6 +290,7 @@ h1.mini{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,
 #title .bar,#title2 .bar,#ranking .bar{flex-direction:row-reverse;justify-content:space-between}
 /* game names centered in the space right of the icon */
 .game b{justify-self:center;text-align:center}
+#giveup #backBtn{left:auto;right:8px}
 </style>
 <div id="probe"></div>
 <canvas id="cv"></canvas>
@@ -1084,9 +1085,9 @@ function renderCore(t){
   if(!song)return;
   // top bar
   ctx.font=`13px ${DISP}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle=C.washi;
-  if(VS){ctx.textAlign='right';ctx.font=`12px ${DISP}`;ctx.fillText(VSN[cp],L.colX+L.colW-6,L.sT+12);ctx.font=`19px ${DISP}`;ctx.fillText(score.toLocaleString(),L.colX+L.colW-6,L.sT+31);}else{
+  if(VS){ctx.textAlign='left';ctx.font=`12px ${DISP}`;ctx.fillText(VSN[cp],L.colX+6,L.sT+12);ctx.font=`19px ${DISP}`;ctx.fillText(score.toLocaleString(),L.colX+6,L.sT+31);}else{
   
-  ctx.textAlign='right';ctx.font=`20px ${DISP}`;ctx.fillText(score.toLocaleString(),W-Math.max(16,L.boxX),L.sT+L.barH/2);}
+  ctx.textAlign='left';ctx.font=`20px ${DISP}`;ctx.fillText(score.toLocaleString(),Math.max(16,L.boxX),L.sT+L.barH/2);}
   // lanes
   const lt=L.laneTop+24;
   ctx.fillStyle='rgba(10,8,12,.72)';ctx.fillRect(L.colX,lt,L.colW,L.padTop-lt-4);
