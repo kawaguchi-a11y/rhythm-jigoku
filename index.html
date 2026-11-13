@@ -269,9 +269,26 @@ h1.mini{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,
 #totList .drow .dl span{font-size:13px;font-weight:700;color:#e9dcc4;white-space:normal;overflow:visible;line-height:1.35}
 #totList .drow .dl small{grid-column:auto;font-size:10px;color:#c9bfae}
 #totList .drow em{font-style:normal;font-family:var(--disp);font-size:16px;color:var(--kin);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* skill description: fixed box, text centered */
+.note.skd{height:48px;min-height:48px;box-sizing:border-box;display:flex!important;align-items:center;justify-content:center;text-align:center;font-size:15px;line-height:1.15;padding:4px 8px;overflow:hidden}
+/* swinging kanabo */
+.kanabo{transform-origin:50% 92%;animation:kanaSwing 1.1s ease-in-out infinite alternate}
+@keyframes kanaSwing{from{transform:rotate(-14deg)}to{transform:rotate(16deg)}}
+@media (prefers-reduced-motion:reduce){.kanabo{animation:none}}
+.copy{display:block;text-align:center;font-size:12px;color:rgba(244,236,219,.7);letter-spacing:.06em;margin-top:-6px}
+/* story panel for パンチ道場 / スワイプ忍者 (1人で) */
+#kPanel{position:fixed;z-index:4;background:var(--washi);color:var(--sumi);border:3px solid var(--sumi);border-radius:12px;box-shadow:4px 4px 0 rgba(0,0,0,.55);padding:7px 10px;display:flex;flex-direction:column;gap:3px;pointer-events:none;box-sizing:border-box;transform:rotate(-1deg)}
+#kPanel .tag{align-self:flex-start;font-family:var(--disp);font-size:11px;padding:1px 7px;background:var(--sumi);color:var(--washi);border-radius:6px}
+#kPanel .who{font-size:10px;font-weight:700;color:var(--mute)}
+#kPanel .line{font-family:var(--disp);font-size:14px;line-height:1.4}
+#kPanel.good{background:#fff4c4}#kPanel.good .tag{background:var(--shu)}
+#kPanel.bad{background:#d6d8e2}#kPanel.bad .tag{background:var(--ai)}
+#kPanel.pop{animation:pop .4s}
 </style>
 <div id="probe"></div>
 <canvas id="cv"></canvas>
+<div id="kPanel" hidden><span class="tag" id="kTag">はじまり</span><span class="who" id="kWho"></span><span class="line" id="kLine"></span></div>
 <div id="panel" hidden><span class="tag" id="pTag">開幕</span><span class="who" id="pWho"></span><span class="line" id="pLine"></span></div>
 
 <div id="giveup" hidden><button type="button" id="backBtn">← もどる</button><button type="button" id="quitBtn">あきらめる</button><button type="button" id="skillBtn">技</button><button type="button" id="skillBtn2" hidden>技</button></div>
@@ -288,6 +305,7 @@ h1.mini{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,
       <button class="game" id="gNinja" type="button"><canvas class="gicon" id="icNinja" width="160" height="160"></canvas><b>スワイプ忍者</b><span>やじるしの むきに ゆびを シュッ！ たて・よこに スワイプ！</span></button>
     </div></div>
     <button type="button" id="rankBtn" class="rankBtn"><canvas class="troph" width="144" height="144"></canvas><small>ランキング</small></button>
+    <small class="copy">© 2026 bl-oom</small>
   </div>
 </section>
 <section class="screen" id="ranking" hidden>
@@ -299,7 +317,7 @@ h1.mini{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,
 <section class="screen" id="title2" hidden>
   <div class="inner tight">
     <div class="bar"><button class="back" type="button" id="backHub2">← もどる</button><h1 class="mini" id="k2title">パンチ道場</h1></div>
-    <p class="note big" id="k2note">ボールや スイカが とんでくるよ。<br>わっかが ちいさく なって かさなった ときに、どこでも タップして パンチ！</p>
+    <p class="note big" id="k2note" hidden>ボールや スイカが とんでくるよ。<br>わっかが ちいさく なって かさなった ときに、どこでも タップして パンチ！</p>
     <div class="pick"><h2>レベル</h2><div class="lv lv5" id="levels2"></div></div>
     <div class="pick"><h2 id="kpick1h">キャラを えらぶ</h2><div class="chars" id="kchars"></div><small class="note skd" id="kskDesc"></small></div>
     <div class="pick" id="kpick2" hidden><h2 id="kpick2h">2P</h2><div class="chars" id="kchars2"></div><small class="note skd" id="kskDesc2"></small></div>
@@ -435,10 +453,10 @@ const LEVELS=[
  {n:5,nm:'鬼',grid:1,hard:true,roll:true,w:[.05,.1,.15],dmg:9,thr:.7}
 ];
 const CHARS=[
- {nm:'黒ラン団長',sk:'auto',skn:'魂の大太鼓',skd:'6秒間、団長が全部自動で叩いてくれる',dur:6,coat:'#17121b',sleeve:'#1b1520',collar:'#0d0b10',btn:C.kin,pants:'#0c0a0e',shoe:'#050405',skin:'#e8bf93',hair:'spiky',hairCol:'#0a0809',band:'#f8f4ea',hand:'#f8f4ea',handR:4.6},
- {nm:'白ラン女団長',sk:'double',skn:'気合全開',skd:'気合が満タンになり、10秒間得点2倍',dur:10,coat:'#efeadf',sleeve:'#e4ded0',collar:'#cfc7b6',btn:C.kin,pants:'#efeadf',shoe:'#050405',skin:'#f0caa2',hair:'pony',hairCol:'#1a1012',band:C.shu,hand:'#f8f4ea',handR:4.6,line:'rgba(0,0,0,.5)'},
- {nm:'チアガール',sk:'barrier',skn:'ポンポンバリア',skd:'10秒間、ミスしてもコンボが切れず、当てれば全部「最高」',dur:10,coat:C.ai,sleeve:'#f0caa2',collar:'#f4ecdb',btn:'#f4ecdb',pants:'#f0caa2',shoe:'#f8f4ea',skirt:C.shu,skin:'#f0caa2',hair:'twin',hairCol:'#5a3418',band:C.kin,hand:C.kin,handR:8,pom:true},
- {nm:'クマ団長',sk:'wide',skn:'ハチミツタイム',skd:'10秒間、判定が2倍ゆるくなる',dur:10,coat:'#17121b',sleeve:'#1b1520',collar:'#0d0b10',btn:C.kin,pants:'#0c0a0e',shoe:'#050405',skin:'#8a5a3b',hair:'bear',hairCol:'#8a5a3b',band:'#f8f4ea',hand:'#8a5a3b',handR:5}
+ {nm:'黒ラン団長',sk:'auto',skn:'魂の大太鼓',skd:'6秒間団長が全部自動で叩いてくれる',dur:6,coat:'#17121b',sleeve:'#1b1520',collar:'#0d0b10',btn:C.kin,pants:'#0c0a0e',shoe:'#050405',skin:'#e8bf93',hair:'spiky',hairCol:'#0a0809',band:'#f8f4ea',hand:'#f8f4ea',handR:4.6},
+ {nm:'白ラン女団長',sk:'double',skn:'気合全開',skd:'気合が満タンになり10秒間得点2倍',dur:10,coat:'#efeadf',sleeve:'#e4ded0',collar:'#cfc7b6',btn:C.kin,pants:'#efeadf',shoe:'#050405',skin:'#f0caa2',hair:'pony',hairCol:'#1a1012',band:C.shu,hand:'#f8f4ea',handR:4.6,line:'rgba(0,0,0,.5)'},
+ {nm:'チアガール',sk:'barrier',skn:'ポンポンバリア',skd:'10秒間ミスしてもコンボが切れず当てれば最高',dur:10,coat:C.ai,sleeve:'#f0caa2',collar:'#f4ecdb',btn:'#f4ecdb',pants:'#f0caa2',shoe:'#f8f4ea',skirt:C.shu,skin:'#f0caa2',hair:'twin',hairCol:'#5a3418',band:C.kin,hand:C.kin,handR:8,pom:true},
+ {nm:'クマ団長',sk:'wide',skn:'ハチミツタイム',skd:'10秒間判定が2倍ゆるくなる',dur:10,coat:'#17121b',sleeve:'#1b1520',collar:'#0d0b10',btn:C.kin,pants:'#0c0a0e',shoe:'#050405',skin:'#8a5a3b',hair:'bear',hairCol:'#8a5a3b',band:'#f8f4ea',hand:'#8a5a3b',handR:5}
 ];
 const lvT=()=>(LEVELS[lvIdx].n-1)/(LEVELS.length-1);
 const lvBpm=st=>Math.round(78+(st.bpm-78)*lvT());
@@ -1177,16 +1195,16 @@ const NSONGS=mkSongs('n',['しのびあし','にんじゃ やしき','まきも�
  KSONGS.forEach((s,i)=>{s.sty=KS[i];});NSONGS.forEach((s,i)=>{const o=NS[i];s.sty=o;s.root=o.root;s.prog=o.prog;});}
 
 const KCH=[
- {nm:'しろおび くん',sk:'wide',skn:'よく みる め',skd:'10秒間、はんていが 2ばい ゆるくなる',dur:10,gi:'#f4f1ea',belt:'#f4f1ea',band:C.shu,hair:'#1a1012'},
- {nm:'あかおび ちゃん',sk:'double',skn:'もえる パンチ',skd:'10秒間、とくてん 2ばい',dur:10,gi:'#f4f1ea',belt:C.shu,band:C.kin,hair:'#5a3418',pony:true},
- {nm:'くろおび しはん',sk:'auto',skn:'むしんの けん',skd:'6秒間、じどうで パンチ',dur:6,gi:'#2b2a33',belt:'#120e14',band:'#f4f1ea',hair:'#9a9a9a',beard:true},
- {nm:'クマ せんせい',sk:'barrier',skn:'クマの ガード',skd:'10秒間、ミスしても れんぞくが きれない',dur:10,gi:'#f4f1ea',belt:C.ai,band:C.shu,bear:true}
+ {nm:'しろおび くん',sk:'wide',skn:'よく みる め',skd:'10秒間 はんていが 2ばい ゆるくなる',dur:10,gi:'#f4f1ea',belt:'#f4f1ea',band:C.shu,hair:'#1a1012'},
+ {nm:'あかおび ちゃん',sk:'double',skn:'もえる パンチ',skd:'10秒間 とくてん 2ばい',dur:10,gi:'#f4f1ea',belt:C.shu,band:C.kin,hair:'#5a3418',pony:true},
+ {nm:'くろおび しはん',sk:'auto',skn:'むしんの けん',skd:'6秒間 じどうで パンチ',dur:6,gi:'#2b2a33',belt:'#120e14',band:'#f4f1ea',hair:'#9a9a9a',beard:true},
+ {nm:'クマ せんせい',sk:'barrier',skn:'クマの ガード',skd:'10秒間 ミスしても れんぞくが きれない',dur:10,gi:'#f4f1ea',belt:C.ai,band:C.shu,bear:true}
 ];
 const NCH=[
- {nm:'くろ にんじゃ',sk:'auto',skn:'かげぶんしん',skd:'6秒間、じどうで きる',dur:6,col:'#2b2440',band:C.shu},
- {nm:'くのいち',sk:'double',skn:'さくら ふぶき',skd:'10秒間、とくてん 2ばい',dur:10,col:'#c2477a',band:'#f4ecdb'},
- {nm:'こにんじゃ',sk:'wide',skn:'しのびの め',skd:'10秒間、はんていが 2ばい ゆるくなる',dur:10,col:'#2f6e4a',band:C.kin},
- {nm:'クマ にんじゃ',sk:'barrier',skn:'クマの まもり',skd:'10秒間、ミスしても れんぞくが きれない',dur:10,col:'#8a5a3b',band:C.ai,bear:true}
+ {nm:'くろ にんじゃ',sk:'auto',skn:'かげぶんしん',skd:'6秒間 じどうで きる',dur:6,col:'#2b2440',band:C.shu},
+ {nm:'くのいち',sk:'double',skn:'さくら ふぶき',skd:'10秒間 とくてん 2ばい',dur:10,col:'#c2477a',band:'#f4ecdb'},
+ {nm:'こにんじゃ',sk:'wide',skn:'しのびの め',skd:'10秒間 はんていが 2ばい ゆるくなる',dur:10,col:'#2f6e4a',band:C.kin},
+ {nm:'クマ にんじゃ',sk:'barrier',skn:'クマの まもり',skd:'10秒間 ミスしても れんぞくが きれない',dur:10,col:'#8a5a3b',band:C.ai,bear:true}
 ];
 function kcIdx(p){const A=GAME==='ninja'?NCH:KCH;return clamp(store.get((p?'kch2-':'kch-')+GAME,p?1:0)|0,0,A.length-1);}
 function kc(p){return (GAME==='ninja'?NCH:KCH)[kcIdx(p)];}
@@ -1318,6 +1336,24 @@ function balanceFlips(A,B,sg){
     sg.notes[i].dir0=d0;sg.notes[i].dir=d;sg.notes[i].flipAt=fa;sg.ev.push({t:fa,k:'meow'});return true;};
   while(f0<f1&&add(o0))f0++;while(f1<f0&&add(o1))f1++;sg.ev.sort((a,b)=>a.t-b.t);}
 function kNew(notes,ch){return{ch,sp:0,skillT:0,skUI:'',score:0,combo:0,maxCombo:0,counts:{p:0,g:0,m:0},errSum:0,errN:0,ni:0,notes:notes.map(n=>({...n})),punch:0,judge:null,broken:[]};}
+const KSTORY={
+ k1:{who:'しろおびの でし',intro:'ゆうやけの どうじょう。きょうから パンチの しゅぎょうだ！',secs:[['ボールを いい音で パンチ！','ボールが あたまに コツン……'],['しはんが「ほう…」と うなずいた！','てが すべって しりもち！'],['からすも おうえんに きた！','おなかが グーッと なった……'],['きょうの しゅぎょう かんりょう！','あしが しびれて うごけない……']]},
+ k2:{who:'ねぼすけ でし',intro:'あさ6じ。ねむい めを こすって パンチの れんしゅう！',secs:[['めが さめた！ からだが かるい！','あくびが とまらない……'],['となりの おじいさんも いっしょに パンチ！','パジャマの まま だった！'],['あさひが まぶしい！ ぜっこうちょう！','ニワトリに コケッと おこられた'],['あさごはんが おいしく たべられる！','にどねしたく なってきた……']]},
+ k3:{who:'あかおびの でし',intro:'きょうは みんなで かわらわりの おけいこ。',secs:[['かわらが きれいに われた！','かわらが かたくて てが ジーン……'],['みんなから はくしゅ！','おびが ほどけちゃった！'],['しはんの まねして キメポーズ！','かけごえが うらがえった……'],['どうじょうに きあいが みなぎる！','ばつとして ぞうきんがけ 100かい……']]},
+ k5:{who:'おまつりの でし',intro:'なつまつりの パンチ たいかい！ スイカが とんでくる！',secs:[['スイカが まっぷたつ！ みんな にっこり！','スイカの たねが はなに はいった！'],['わたあめやさんが おうえんして くれた！','ゆかたの そでが じゃま……'],['はなびと パンチが ぴったり！','きんぎょすくいに みとれてた……'],['おまつりの ヒーローに なった！','やきそばを こぼしちゃった……']]},
+ k7:{who:'よるの でし',intro:'まよなかの しゅぎょう。ながれぼしが とんでくる…！？',secs:[['ながれぼしを パンチで キャッチ！','くらくて なにも みえない！'],['ふくろうが「ホーホー」と ほめてくれた','つまずいて ころんだ……'],['おつきさまも わらってる！','ねむくて めが とじそう……'],['よぞらに パンチの 音が ひびいた！','おばけかと おもって にげだした……']]},
+ k8:{who:'くろおびを めざす でし',intro:'いよいよ しょうだんの しけん。しはんが じっと みている……',secs:[['しはんの まゆげが ピクッと うごいた！','きんちょうで てが ふるえる……'],['「なかなか やるな」と しはん！','おびを ぎゃくに しめていた！'],['どうじょうじゅうが しーんと みまもる！','くしゃみが でちゃった……'],['ごうかく！ くろおびに いっぽ ちかづいた！','らいねん また ちょうせんだ！']]},
+ n1:{who:'みならい にんじゃ',intro:'よなかの おやしきに しのびこむ。おとを たてずに すすめ！',secs:[['ろうかを すいすい すすんだ！','ゆかが ギシッ！「…なにやつ？」'],['ねている けらいの よこを すりぬけた！','「くせもの！」 みつかりそう！'],['ねこの まねで ニャーと ごまかした！','かびんを たおしちゃった！'],['だれにも きづかれず だっしゅつ！','「であえ であえー！」 にげろー！']]},
+ n2:{who:'にんじゃ',intro:'からくり だらけの にんじゃやしき。かべが ぐるっと まわる！',secs:[['どんでんがえしを くるりと ぬけた！','かべに はさまれた！'],['おとしあなを ひらりと よけた！','たたみが ひっくりかえった！'],['てんじょうからの しゅりけんを よけた！','「なにやつ！」 とのさまに みつかった'],['やしきの なぞを ぜんぶ といた！','めが まわって ふらふら……']]},
+ n3:{who:'くのいち',intro:'ひみつの まきものを さがせ！ くらの かぎが あいている……',secs:[['まきもの はっけん！','まちがえて こんだての メモを とった'],['ばんにんの せなかを すりぬけた！','「そこに おるのは だれじゃ！」'],['まきものに ひみつの ちずが！','ねずみに まきものを かじられた！'],['まきものを もちかえった！ おかしら にっこり','からっぽの はこだった……']]},
+ n5:{who:'へんそう にんじゃ',intro:'かくれみのの じゅつで おやしきの にわへ。',secs:[['いしどうろうに なりきった！','「いしどうろうが うごいたぞ！」'],['いけの こいに まぎれた！','くしゃみで ばれそう！'],['ばんけんが そのまま とおりすぎた！','いぬに ほえられた！ ワンワン！'],['だれにも みつからず にんむ かんりょう！','「なにやつ！ まてー！」']]},
+ n7:{who:'よるの にんじゃ',intro:'まんげつの よる。やねの うえを はしりぬけろ！',secs:[['かわらの うえを スタタタタ！','かわらが ずれて カラン……'],['やねから やねへ ひとっとび！','「やねに だれか おるぞ！」'],['おつきさまを バックに キメポーズ！','からすと ぶつかった！'],['おしろまで あっというま！','あしを すべらせて ぶらさがり……']]},
+ n8:{who:'にんじゃの かしら',intro:'さいごの にんむ。おしろの てっぺんの きんの しゃちほこを みにいけ！',secs:[['いしがきを するする のぼった！','「くせものじゃー！」 やりが とんできた'],['ばんにんの めを すりぬけた！','てんしゅかくの かぎが かたい……'],['しゃちほこと にらめっこ！','とのさまと めが あった…「なにやつ？」'],['にんむ だいせいこう！ でんせつの にんじゃだ！','また こんど リベンジだ！']]}
+};
+function kPanelPos(){const e=$('kPanel').style;if(!K)return;
+  if(K.mode==='ninja'){const S=Math.min(W*0.26,70),cx=W/2,w=Math.max(96,cx-S*0.8-16);e.left='8px';e.width=w+'px';e.top=(L.sT+128)+'px';}
+  else{const w=Math.min(W-24,400);e.left=((W-w)/2)+'px';e.width=w+'px';e.top=(L.sT+124)+'px';}}
+function kSay(tag,line,cls){if(!K||!K.story)return;const p=$('kPanel');$('kTag').textContent=tag;$('kWho').textContent=K.story.who;$('kLine').textContent=line;kPanelPos();p.className=cls||'';void p.offsetWidth;p.classList.add('pop');}
 function karaStart(i){
   if(!initAudio())return;if(GAME==='oen')GAME='kara';
   const s=(GAME==='ninja'?NSONGS:KSONGS)[i],LV=LEVELS[lvIdx];[PERF,GOOD,MISS]=LV.w;
@@ -1325,10 +1361,11 @@ function karaStart(i){
   if(VS){const mix=Math.random()<0.5;if(mix){splitNotes(K.P[0].notes,K.P[1].notes,sg.bar);if(GAME==='ninja')balanceFlips(K.P[0].notes,K.P[1].notes,sg);}K.P.forEach(Q=>{Q.judge={text:mix?'こうたいで うとう！':'いっしょに うとう！',col:C.kin,t:-1.6};});}
   if(musicBus){try{musicBus.disconnect();}catch(e){}}musicBus=AC.createGain();musicBus.gain.value=0.9;musicBus.connect(master);
   songStart=AC.currentTime+0.6;song=null;
+  K.story=VS?null:(KSTORY[s.id]||null);K.secIdx=0;if(K.story)kSay('はじまり',K.story.intro,'');
   ['hub','title','title2','result'].forEach(id=>$(id).hidden=true);$('panel').hidden=true;$('giveup').hidden=false;$('giveup').classList.toggle('vs',VS);$('giveup').classList.remove('top');$('skillBtn').hidden=false;$('skillBtn2').hidden=!VS;$('skillBtn').className='';$('skillBtn2').className='';
   state='play';
 }
-function kJudge(P,n,res,err){if(P.skillT>0&&P.ch&&P.ch.sk==='barrier'&&res!=='perfect'){if(res!=='miss')res='perfect';else{n.judged=true;n.missed=true;P.judge={text:'ガード！',col:'#ffa8d8',t:0};return;}}n.judged=true;
+function kJudge(P,n,res,err){n.res=res;if(P.skillT>0&&P.ch&&P.ch.sk==='barrier'&&res!=='perfect'){if(res!=='miss')res='perfect';else{n.judged=true;n.missed=true;P.judge={text:'ガード！',col:'#ffa8d8',t:0};return;}}n.judged=true;
   if(res==='perfect'||res==='good'){const pf=res==='perfect';pf?P.counts.p++:P.counts.g++;P.combo++;P.score+=(pf?1000+Math.min(P.combo,100)*5:500+Math.min(P.combo,100)*2)*(P.skillT>0&&P.ch&&P.ch.sk==='double'?2:1);if(P.skillT<=0)P.sp=Math.min(100,P.sp+4);P.errSum+=err;P.errN++;P.judge={text:pf?'ぴったり！':'おしい！',col:pf?C.kin:C.washi,t:0};}
   else{P.counts.m++;P.combo=0;P.judge={text:'ミス',col:'#8d95b8',t:0};n.missed=true;}
   P.maxCombo=Math.max(P.maxCombo,P.combo);}
@@ -1355,6 +1392,9 @@ function karaUpdate(dt){
         {const nn=K.P.length,x0=nn>1?pi*W/2:0,w=nn>1?W/2:W;let x,y;if(K.mode==='ninja'){x=x0+w/2;y=H-L.sB-34-112*Math.min(w/170,1.3);}else{const s=Math.min(w/150,(H*0.42)/150);x=x0+w*0.62;y=H-L.sB-40-152*s;}skPlace(b,P.skillT<=0&&P.sp>=100,x,y);}}}
     while(P.ni<P.notes.length&&P.notes[P.ni].judged)P.ni++;
     for(let i=P.ni;i<P.notes.length;i++){const n=P.notes[i];if(n.t>j)break;if(!n.judged&&j>n.t+MISS*(P.skillT>0&&P.ch&&P.ch.sk==='wide'?2:1)){if(n.cat){n.judged=true;n.dodged=true;P.score+=200;}else kJudge(P,n,'miss',0);}}}
+  if(K.story&&K.secIdx<4){const se=(1+4*(K.secIdx+1))*sg.bar;if(j>=se+0.2){const a=(1+4*K.secIdx)*sg.bar,P=K.P[0];let pts=0,mx=0;
+    for(const n of P.notes){if(n.cat||n.t<a||n.t>=se)continue;mx+=2;if(n.res==='perfect')pts+=2;else if(n.res==='good')pts+=1;}
+    const ok=mx?pts/mx>=LEVELS[lvIdx].thr:true;kSay(ok?'やったね！':'あちゃー',K.story.secs[K.secIdx][ok?0:1],ok?'good':'bad');K.secIdx++;}}
   if(songNow()>sg.end)karaFinish();
 }
 function drawObj(kind,x,y,r,rot){ctx.save();ctx.translate(x,y);ctx.rotate(rot);
@@ -1490,7 +1530,7 @@ function showHub(){state='title';stopMusic();song=null;K=null;buildModes();['tit
 // ---------- loop
 let last=0;
 function frame(ts){
-  requestAnimationFrame(frame);
+  requestAnimationFrame(frame);{const kp=$('kPanel'),on=!!(K&&K.story&&state==='play'&&GAME!=='oen');if(kp.hidden===on)kp.hidden=!on;}
   const dt=Math.min(0.05,(ts-last)/1000||0);last=ts;
   if(state==='title'||state==='result'){if(state==='result')return;}
   if(GAME!=='oen'){karaUpdate(dt);karaRender(ts/1000);return;}
