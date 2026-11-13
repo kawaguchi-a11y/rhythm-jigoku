@@ -1530,7 +1530,7 @@ async function showTotal(){['hub','title','title2','result'].forEach(id=>$(id).h
     ub.addEventListener('click',e=>{e.stopPropagation();if(det.hidden&&!det.childElementCount)fillDetail(det,a.recs);det.hidden=!det.hidden;ub.textContent=det.hidden?'内訳':'とじる';ub.setAttribute('aria-expanded',String(!det.hidden));});
     li.append(s,b,ub,c,det);list.appendChild(li);});
   if(!arr.length)list.innerHTML='<li><span>まだ きろくが ないよ</span></li>';
-  $('totNote').textContent='あそぶたびに とくてんが たされていくよ！「内訳」で あそんだ きろくが 見られるよ。'+(shared?'':'（この スマホの きろく）');}
+  $('totNote').hidden=true;}
 function showHub(){state='title';stopMusic();song=null;K=null;buildModes();['title','title2','result','ranking'].forEach(id=>$(id).hidden=true);$('panel').hidden=true;$('giveup').hidden=true;$('hub').hidden=false;}
 
 // ---------- loop
